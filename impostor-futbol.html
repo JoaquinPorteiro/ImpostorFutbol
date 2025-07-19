@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ImpostorFútbol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen {
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .player-count {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 10px rgba(255,107,107,0.4);
+        }
+
+        .pass-phone {
+            font-size: 1.5rem;
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .player-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd93d;
+            margin-bottom: 20px;
+        }
+
+        .tap-screen {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        .role-reveal {
+            padding: 20px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .role-type {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .impostor {
+            color: #ff4757;
+            text-shadow: 0 0 20px rgba(255,71,87,0.8);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .footballer {
+            color: #4cd137;
+            text-shadow: 0 0 20px rgba(76,209,55,0.8);
+        }
+
+        .footballer-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .all-players-ready {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #ffd93d;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-summary {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-item {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.8; }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 20px rgba(255,71,87,0.8); }
+            50% { text-shadow: 0 0 30px rgba(255,71,87,1), 0 0 40px rgba(255,71,87,0.6); }
+            100% { text-shadow: 0 0 20px rgba(255,71,87,0.8); }
+        }
+
+        @media (max-width: 380px) {
+            h1 { font-size: 2rem; }
+            .footballer-name { font-size: 2rem; }
+            .player-number { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="setupScreen" class="screen active">
+            <h1>⚽ ImpostorFútbol</h1>
+            <div class="player-count">
+                <label for="playerCount">Número de jugadores:</label>
+                <input type="number" id="playerCount" min="3" max="20" value="4">
+            </div>
+            <button onclick="startGame()">Iniciar Juego</button>
+        </div>
+
+        <div id="passPhoneScreen" class="screen">
+            <div class="pass-phone">
+                <div class="player-number">Jugador <span id="currentPlayerNum">1</span></div>
+                <div>Pasa el teléfono al siguiente jugador</div>
+                <div class="tap-screen">Toca la pantalla para continuar</div>
+            </div>
+        </div>
+
+        <div id="roleScreen" class="screen">
+            <div class="role-reveal">
+                <div id="roleInfo"></div>
+                <div class="tap-screen">Toca para continuar</div>
+            </div>
+        </div>
+
+        <div id="gameReadyScreen" class="screen">
+            <div class="all-players-ready">¡Todos listos!</div>
+            <div class="game-summary">
+                <div class="summary-item">🎭 Hay 1 impostor entre ustedes</div>
+                <div class="summary-item">⚽ Los demás conocen al futbolista</div>
+                <div class="summary-item" id="footballerHint"></div>
+            </div>
+            <button onclick="startDiscussion()">Comenzar Discusión</button>
+            <button onclick="resetGame()" style="background: #718093; margin-top: 10px;">Nuevo Juego</button>
+        </div>
+    </div>
+
+    <script>
+        const footballers = [
+            "Lionel Messi", "Cristiano Ronaldo", "Kylian Mbappé", "Erling Haaland", "Vinícius Júnior",
+            "Jude Bellingham", "Bukayo Saka", "Phil Foden", "Pedri", "Gavi",
+            "Luka Modrić", "Kevin De Bruyne", "Mohamed Salah", "Robert Lewandowski", "Karim Benzema",
+            "Neymar Jr", "Harry Kane", "Son Heung-min", "Lautaro Martínez", "Victor Osimhen",
+            "Khvicha Kvaratskhelia", "Rafael Leão", "Marcus Rashford", "Jamal Musiala", "Florian Wirtz",
+            "Eduardo Camavinga", "Aurélien Tchouaméni", "Rodri", "Declan Rice", "Martin Ødegaard",
+            "Bruno Fernandes", "Bernardo Silva", "İlkay Gündoğan", "Antoine Griezmann", "Paulo Dybala",
+            "Ángel Di María", "Julián Álvarez", "Darwin Núñez", "Gabriel Jesus", "Gabriel Martinelli",
+            "Richarlison", "Rodrigo De Paul", "Enzo Fernández", "Alexis Mac Allister", "Moisés Caicedo",
+            "Casemiro", "Federico Valverde", "Toni Kroos", "Marco Verratti", "Joshua Kimmich",
+            "Leon Goretzka", "Alphonso Davies", "Theo Hernández", "Achraf Hakimi", "João Cancelo",
+            "Trent Alexander-Arnold", "Reece James", "Andrew Robertson", "Rúben Dias", "Virgil van Dijk",
+            "Antonio Rüdiger", "Éder Militão", "Marquinhos", "Alessandro Bastoni", "Ronald Araújo",
+            "Jules Koundé", "Dayot Upamecano", "Matthijs de Ligt", "Lisandro Martínez", "William Saliba",
+            "Alisson Becker", "Thibaut Courtois", "Marc-André ter Stegen", "Ederson", "Manuel Neuer",
+            "Jan Oblak", "Mike Maignan", "Gianluigi Donnarumma", "Emiliano Martínez", "Andriy Lunin",
+            "Ousmane Dembélé", "Kingsley Coman", "Serge Gnabry", "Federico Chiesa", "Dusan Vlahovic",
+            "Cody Gakpo", "Luis Díaz", "Ansu Fati", "Alejandro Garnacho", "Yeremy Pino",
+            "Nicolò Barella", "Sergej Milinkovic-Savic", "Christopher Nkunku", "Dominik Szoboszlai", "Mason Mount",
+            "Kai Havertz", "Leroy Sané", "Jack Grealish", "James Maddison", "Cole Palmer"
+        ];
+
+        let currentGame = {
+            playerCount: 0,
+            currentPlayer: 0,
+            impostorIndex: 0,
+            selectedFootballer: '',
+            roles: []
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            const playerCount = parseInt(document.getElementById('playerCount').value);
+            if (playerCount < 3 || playerCount > 20) {
+                alert('Por favor ingresa un número entre 3 y 20 jugadores');
+                return;
+            }
+
+            currentGame.playerCount = playerCount;
+            currentGame.currentPlayer = 1;
+            currentGame.impostorIndex = Math.floor(Math.random() * playerCount) + 1;
+            currentGame.selectedFootballer = footballers[Math.floor(Math.random() * footballers.length)];
+            currentGame.roles = [];
+
+            showPassPhone();
+        }
+
+        function showPassPhone() {
+            document.getElementById('currentPlayerNum').textContent = currentGame.currentPlayer;
+            showScreen('passPhoneScreen');
+            
+            document.getElementById('passPhoneScreen').onclick = showRole;
+        }
+
+        function showRole() {
+            const isImpostor = currentGame.currentPlayer === currentGame.impostorIndex;
+            const roleInfo = document.getElementById('roleInfo');
+            
+            if (isImpostor) {
+                roleInfo.innerHTML = `
+                    <div class="role-type impostor">¡IMPOSTOR!</div>
+                    <div>Debes fingir conocer al futbolista</div>
+                `;
+                currentGame.roles.push('Impostor');
+            } else {
+                roleInfo.innerHTML = `
+                    <div class="role-type footballer">FUTBOLISTA</div>
+                    <div class="footballer-name">${currentGame.selectedFootballer}</div>
+                `;
+                currentGame.roles.push(currentGame.selectedFootballer);
+            }
+            
+            showScreen('roleScreen');
+            
+            document.getElementById('roleScreen').onclick = nextPlayer;
+        }
+
+        function nextPlayer() {
+            currentGame.currentPlayer++;
+            
+            if (currentGame.currentPlayer <= currentGame.playerCount) {
+                showPassPhone();
+            } else {
+                showGameReady();
+            }
+        }
+
+        function showGameReady() {
+            const hint = currentGame.selectedFootballer.split(' ')[0];
+            document.getElementById('footballerHint').textContent = 
+                `💡 Pista: El nombre del futbolista empieza con "${hint[0]}"`;
+            showScreen('gameReadyScreen');
+        }
+
+        function startDiscussion() {
+            alert('¡Que comience la discusión! Encuentren al impostor entre ustedes.');
+        }
+
+        function resetGame() {
+            currentGame = {
+                playerCount: 0,
+                currentPlayer: 0,
+                impostorIndex: 0,
+                selectedFootballer: '',
+                roles: []
+            };
+            document.getElementById('playerCount').value = 4;
+            showScreen('setupScreen');
+        }
+
+        // Prevenir zoom en iOS
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        // Prevenir scroll
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
