@@ -16,18 +16,17 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            padding: 20px;
             touch-action: manipulation;
         }
 
         .container {
             width: 100%;
             max-width: 400px;
-            padding: 20px;
             text-align: center;
         }
 
@@ -36,6 +35,12 @@
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             animation: fadeIn 0.5s ease-out;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffd93d;
         }
 
         .screen {
@@ -47,17 +52,17 @@
             display: block;
         }
 
-        .player-count {
-            margin-bottom: 30px;
+        .input-group {
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
             font-size: 1.2rem;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
-        input[type="number"] {
+        input[type="number"], select {
             width: 100%;
             padding: 15px;
             font-size: 1.5rem;
@@ -80,14 +85,24 @@
             cursor: pointer;
             box-shadow: 0 6px 20px rgba(255,107,107,0.4);
             transition: all 0.3s ease;
-            margin-top: 20px;
+            margin-top: 10px;
             width: 100%;
             max-width: 300px;
         }
 
+        button.secondary {
+            background: #4834d4;
+            box-shadow: 0 6px 20px rgba(72,52,212,0.4);
+        }
+
+        button.small {
+            padding: 10px 20px;
+            font-size: 1rem;
+            max-width: 200px;
+        }
+
         button:active {
             transform: scale(0.95);
-            box-shadow: 0 3px 10px rgba(255,107,107,0.4);
         }
 
         .pass-phone {
@@ -173,6 +188,62 @@
             margin: 10px 0;
         }
 
+        .player-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+
+        .player-item button {
+            background: #ee5a6f;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            max-width: 80px;
+            margin: 0;
+        }
+
+        .add-player {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .add-player input {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: #333;
+        }
+
+        .add-player button {
+            max-width: 100px;
+            margin: 0;
+            padding: 12px 20px;
+        }
+
+        .player-count-info {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -200,17 +271,42 @@
             .footballer-name { font-size: 2rem; }
             .player-number { font-size: 2.5rem; }
         }
+
+        .scrollable {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="setupScreen" class="screen active">
             <h1>⚽ ImpostorFútbol</h1>
-            <div class="player-count">
+            <div class="input-group">
                 <label for="playerCount">Número de jugadores:</label>
-                <input type="number" id="playerCount" min="3" max="20" value="4">
+                <input type="number" id="playerCount" min="3" max="20" value="4" onchange="updateImpostorOptions()">
+            </div>
+            <div class="input-group">
+                <label for="impostorCount">Número de impostores:</label>
+                <select id="impostorCount">
+                    <option value="1">1 impostor</option>
+                </select>
             </div>
             <button onclick="startGame()">Iniciar Juego</button>
+            <button onclick="showPlayerEditor()" class="secondary">Editar Jugadores</button>
+        </div>
+
+        <div id="playerEditorScreen" class="screen">
+            <h2>📝 Editor de Jugadores</h2>
+            <div class="player-count-info">
+                Total de jugadores: <span id="totalPlayers">100</span>
+            </div>
+            <div class="player-list scrollable" id="playerList"></div>
+            <div class="add-player">
+                <input type="text" id="newPlayerName" placeholder="Nombre del jugador">
+                <button onclick="addPlayer()">Agregar</button>
+            </div>
+            <button onclick="savePlayerList()" style="margin-top: 20px;">Guardar y Volver</button>
         </div>
 
         <div id="passPhoneScreen" class="screen">
@@ -231,9 +327,8 @@
         <div id="gameReadyScreen" class="screen">
             <div class="all-players-ready">¡Todos listos!</div>
             <div class="game-summary">
-                <div class="summary-item">🎭 Hay 1 impostor entre ustedes</div>
+                <div class="summary-item" id="impostorSummary"></div>
                 <div class="summary-item">⚽ Los demás conocen al futbolista</div>
-                <div class="summary-item" id="footballerHint"></div>
             </div>
             <button onclick="startDiscussion()">Comenzar Discusión</button>
             <button onclick="resetGame()" style="background: #718093; margin-top: 10px;">Nuevo Juego</button>
@@ -241,7 +336,7 @@
     </div>
 
     <script>
-        const footballers = [
+        let footballers = [
             "Lionel Messi", "Cristiano Ronaldo", "Kylian Mbappé", "Erling Haaland", "Vinícius Júnior",
             "Jude Bellingham", "Bukayo Saka", "Phil Foden", "Pedri", "Gavi",
             "Luka Modrić", "Kevin De Bruyne", "Mohamed Salah", "Robert Lewandowski", "Karim Benzema",
@@ -264,13 +359,33 @@
             "Kai Havertz", "Leroy Sané", "Jack Grealish", "James Maddison", "Cole Palmer"
         ];
 
+        // Cargar lista guardada si existe
+        if (localStorage.getItem('footballersList')) {
+            footballers = JSON.parse(localStorage.getItem('footballersList'));
+        }
+
         let currentGame = {
             playerCount: 0,
+            impostorCount: 0,
             currentPlayer: 0,
-            impostorIndex: 0,
+            impostorIndices: [],
             selectedFootballer: '',
             roles: []
         };
+
+        function updateImpostorOptions() {
+            const playerCount = parseInt(document.getElementById('playerCount').value);
+            const impostorSelect = document.getElementById('impostorCount');
+            const maxImpostors = Math.floor(playerCount / 2);
+            
+            impostorSelect.innerHTML = '';
+            for (let i = 1; i <= maxImpostors && i <= 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i === 1 ? '1 impostor' : `${i} impostores`;
+                impostorSelect.appendChild(option);
+            }
+        }
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
@@ -279,18 +394,76 @@
             document.getElementById(screenId).classList.add('active');
         }
 
+        function showPlayerEditor() {
+            renderPlayerList();
+            showScreen('playerEditorScreen');
+        }
+
+        function renderPlayerList() {
+            const listContainer = document.getElementById('playerList');
+            listContainer.innerHTML = '';
+            
+            footballers.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-item';
+                playerDiv.innerHTML = `
+                    <span>${player}</span>
+                    <button onclick="removePlayer(${index})">Quitar</button>
+                `;
+                listContainer.appendChild(playerDiv);
+            });
+            
+            document.getElementById('totalPlayers').textContent = footballers.length;
+        }
+
+        function addPlayer() {
+            const newPlayerInput = document.getElementById('newPlayerName');
+            const playerName = newPlayerInput.value.trim();
+            
+            if (playerName && !footballers.includes(playerName)) {
+                footballers.push(playerName);
+                footballers.sort();
+                newPlayerInput.value = '';
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(index) {
+            if (footballers.length > 10) { // Mantener mínimo 10 jugadores
+                footballers.splice(index, 1);
+                renderPlayerList();
+            } else {
+                alert('Debes mantener al menos 10 jugadores en la lista');
+            }
+        }
+
+        function savePlayerList() {
+            localStorage.setItem('footballersList', JSON.stringify(footballers));
+            showScreen('setupScreen');
+        }
+
         function startGame() {
             const playerCount = parseInt(document.getElementById('playerCount').value);
+            const impostorCount = parseInt(document.getElementById('impostorCount').value);
+            
             if (playerCount < 3 || playerCount > 20) {
                 alert('Por favor ingresa un número entre 3 y 20 jugadores');
                 return;
             }
 
             currentGame.playerCount = playerCount;
+            currentGame.impostorCount = impostorCount;
             currentGame.currentPlayer = 1;
-            currentGame.impostorIndex = Math.floor(Math.random() * playerCount) + 1;
             currentGame.selectedFootballer = footballers[Math.floor(Math.random() * footballers.length)];
             currentGame.roles = [];
+            
+            // Seleccionar impostores aleatorios
+            const indices = Array.from({length: playerCount}, (_, i) => i + 1);
+            currentGame.impostorIndices = [];
+            for (let i = 0; i < impostorCount; i++) {
+                const randomIndex = Math.floor(Math.random() * indices.length);
+                currentGame.impostorIndices.push(indices.splice(randomIndex, 1)[0]);
+            }
 
             showPassPhone();
         }
@@ -303,7 +476,7 @@
         }
 
         function showRole() {
-            const isImpostor = currentGame.currentPlayer === currentGame.impostorIndex;
+            const isImpostor = currentGame.impostorIndices.includes(currentGame.currentPlayer);
             const roleInfo = document.getElementById('roleInfo');
             
             if (isImpostor) {
@@ -336,25 +509,32 @@
         }
 
         function showGameReady() {
-            const hint = currentGame.selectedFootballer.split(' ')[0];
-            document.getElementById('footballerHint').textContent = 
-                `💡 Pista: El nombre del futbolista empieza con "${hint[0]}"`;
+            const impostorText = currentGame.impostorCount === 1 
+                ? '🎭 Hay 1 impostor entre ustedes' 
+                : `🎭 Hay ${currentGame.impostorCount} impostores entre ustedes`;
+            
+            document.getElementById('impostorSummary').textContent = impostorText;
             showScreen('gameReadyScreen');
         }
 
         function startDiscussion() {
-            alert('¡Que comience la discusión! Encuentren al impostor entre ustedes.');
+            const message = currentGame.impostorCount === 1
+                ? '¡Que comience la discusión! Encuentren al impostor entre ustedes.'
+                : `¡Que comience la discusión! Encuentren a los ${currentGame.impostorCount} impostores entre ustedes.`;
+            alert(message);
         }
 
         function resetGame() {
             currentGame = {
                 playerCount: 0,
+                impostorCount: 0,
                 currentPlayer: 0,
-                impostorIndex: 0,
+                impostorIndices: [],
                 selectedFootballer: '',
                 roles: []
             };
             document.getElementById('playerCount').value = 4;
+            updateImpostorOptions();
             showScreen('setupScreen');
         }
 
@@ -363,10 +543,15 @@
             e.preventDefault();
         });
 
-        // Prevenir scroll
+        // Permitir scroll solo en elementos scrollables
         document.addEventListener('touchmove', function(e) {
-            e.preventDefault();
+            if (!e.target.closest('.scrollable')) {
+                e.preventDefault();
+            }
         }, { passive: false });
+
+        // Inicializar
+        updateImpostorOptions();
     </script>
 </body>
 </html>
